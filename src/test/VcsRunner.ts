@@ -122,7 +122,8 @@ class VcsRunner {
     }
 
     nextInstruction(): Instruction {
-        return Instruction.opcodes[this.getBoard().getBus().peek(this.getBoard().getCpu().state.p)];
+        const opcodeResolver = this.getBoard().getCpu().opcodeResolver;
+        return opcodeResolver.resolve(this.getBoard().getBus().peek(this.getBoard().getCpu().state.p));
     }
 
     jumpTo(label: string): this {

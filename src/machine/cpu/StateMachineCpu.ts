@@ -29,14 +29,25 @@ import BusInterface from '../bus/BusInterface';
 import RngInterface from '../../tools/rng/GeneratorInterface';
 import { boot, irq, nmi } from './statemachine/vector';
 import Compiler from './statemachine/Compiler';
+import { CompilerFactory } from './statemachine/CompilerInterface';
+import OpcodeResolver from './OpcodeResolver';
 
 class StateMachineCpu implements CpuInterface {
-    constructor(private _bus: BusInterface, private _rng?: RngInterface) {
+    constructor(
+        private _bus: BusInterface,
+        private _rng?: RngInterface,
+        compilerFactory?: CompilerFactory,
+        opcodeResolver?: OpcodeResolver
+    ) {
         this._opBoot = boot(this.state);
         this._opIrq = irq(this.state);
         this._opNmi = nmi(this.state);
 
-        const compiler = new Compiler(this.state);
+        this.opcodeResolver = opcodeResolver ?? new OpcodeResolver();
+
+        const compiler =
+            compilerFactory?.(this.state, this.opcodeResolver) ?? new Compiler(this.state, this.opcodeResolver);
+
         for (let op = 0; op < 256; op++) {
             this._operations[op] = compiler.compile(op);
         }
@@ -204,6 +215,7 @@ class StateMachineCpu implements CpuInterface {
 
     executionState = CpuInterface.ExecutionState.boot;
     state = new CpuInterface.State();
+    opcodeResolver: OpcodeResolver;
 
     private _invalidInstructionCallback: CpuInterface.InvalidInstructionCallbackInterface = null;
 

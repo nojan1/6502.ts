@@ -79,6 +79,7 @@
     "find-elm-dependencies": "DirtyHairy/find-elm-dependencies#fix-leading-block-comment"
   },
   "scripts": {
+    "test-x": "mocha --require ts-node/register -u tdd -R spec 'tests/ts/**/*.ts'",
     "test": "mocha --require ts-node/register -u tdd -R spec 'tests/ts/**/*.ts' && elm-test",
     "build": "rm -fr .rpt2_cache; rollup -c rollup.config.js",
     "dev": "rm -fr .rpt2_cache; DEVELOPMENT=1 rollup -c rollup.config.js",

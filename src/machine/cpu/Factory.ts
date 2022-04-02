@@ -28,17 +28,26 @@ import BusInterface from '../bus/BusInterface';
 import CpuInterface from './CpuInterface';
 import StateMachineCpu from './StateMachineCpu';
 import BatchedAccessCpu from './BatchedAccessCpu';
+import { CompilerFactory } from './statemachine/CompilerInterface';
+import OpcodeResolver from './OpcodeResolver';
+import Compiler65C02 from './statemachine/Compiler65C02';
+import OpcodeResolver65C02 from './OpcodeResolve65C02';
 
 class Factory {
     constructor(private _type: Factory.Type) {}
 
-    create(bus: BusInterface, rng?: RngInterface): CpuInterface {
+    create(
+        bus: BusInterface,
+        rng?: RngInterface,
+        compilerFactory?: CompilerFactory,
+        opcodeResolver?: OpcodeResolver
+    ): CpuInterface {
         switch (this._type) {
             case Factory.Type.stateMachine:
-                return new StateMachineCpu(bus, rng);
+                return new StateMachineCpu(bus, rng, compilerFactory, opcodeResolver);
 
             case Factory.Type.batchedAccess:
-                return new BatchedAccessCpu(bus, rng);
+                return new BatchedAccessCpu(bus, rng, opcodeResolver);
 
             default:
                 throw new Error('invalid CPU type');
@@ -49,8 +58,16 @@ class Factory {
 namespace Factory {
     export enum Type {
         stateMachine,
-        batchedAccess
+        batchedAccess,
     }
 }
+
+export const Create65C02Cpu = (type: Factory.Type, bus: BusInterface, rng?: RngInterface) =>
+    new Factory(type).create(
+        bus,
+        rng,
+        (state, opcodeResolver) => new Compiler65C02(state, opcodeResolver),
+        new OpcodeResolver65C02()
+    );
 
 export default Factory;

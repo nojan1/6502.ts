@@ -23,6 +23,8 @@
  *   SOFTWARE.
  */
 
+import OpcodeResolver from './OpcodeResolver';
+
 interface CpuInterface {
     setInterrupt(irq: boolean): CpuInterface;
 
@@ -48,13 +50,14 @@ interface CpuInterface {
 
     executionState: CpuInterface.ExecutionState;
     state: CpuInterface.State;
+    opcodeResolver: OpcodeResolver;
 }
 
 namespace CpuInterface {
     export const enum ExecutionState {
         boot,
         fetch,
-        execute
+        execute,
     }
 
     export class State {
@@ -77,7 +80,7 @@ namespace CpuInterface {
         b = 0x10, // break
         e = 0x20, // reserved
         v = 0x40, // overflow
-        n = 0x80 // sign
+        n = 0x80, // sign
     }
 
     export interface InvalidInstructionCallbackInterface {

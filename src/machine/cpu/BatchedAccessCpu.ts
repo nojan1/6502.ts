@@ -29,10 +29,11 @@ import CpuInterface from './CpuInterface';
 import * as ops from './ops';
 
 import RngInterface from '../../tools/rng/GeneratorInterface';
+import OpcodeResolver from './OpcodeResolver';
 
 const enum InterruptCheck {
     endOfInstruction,
-    beforeOp
+    beforeOp,
 }
 export function opBoot(state: CpuInterface.State, bus: BusInterface): void {
     state.p = bus.readWord(0xfffc);
@@ -69,7 +70,9 @@ export function opNmi(state: CpuInterface.State, bus: BusInterface) {
 }
 
 class BatchedAccessCpu {
-    constructor(private _bus: BusInterface, private _rng?: RngInterface) {
+    constructor(private _bus: BusInterface, private _rng?: RngInterface, opcodeResolver?: OpcodeResolver) {
+        this.opcodeResolver = opcodeResolver ?? new OpcodeResolver();
+
         this.reset();
     }
 
@@ -191,7 +194,7 @@ class BatchedAccessCpu {
     }
 
     private _fetch() {
-        const instruction = Instruction.opcodes[this._bus.read(this.state.p)];
+        const instruction = this.opcodeResolver.resolve(this._bus.read(this.state.p));
 
         let addressingMode = instruction.addressingMode,
             dereference = false,
@@ -814,6 +817,7 @@ class BatchedAccessCpu {
 
     executionState: CpuInterface.ExecutionState = CpuInterface.ExecutionState.boot;
     state: CpuInterface.State = new CpuInterface.State();
+    opcodeResolver: OpcodeResolver;
 
     private _opCycles: number = 0;
     private _instructionCallback: InstructionCallbackInterface = null;

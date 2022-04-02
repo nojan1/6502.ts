@@ -29,12 +29,14 @@ import { run as testArithmetics } from './testArithmetics';
 import { run as testOtherOpcodes } from './testOtherOpcodes';
 import { run as testAccessPatterns } from './testAccessPatterns';
 import { run as testUndocumentedOpcodes } from './testUndocumentedOpcodes';
+import { run as test65C02 } from './test65C02';
 
 import BatchedAddressCp from '../../../../src/machine/cpu/BatchedAccessCpu';
+import StateMachineCpu from '../../../../src/machine/cpu/StateMachineCpu';
 
 import { run as testInterrupt } from './testInterrupt';
 import Runner from './Runner';
-import StateMachineCpu from '../../../../src/machine/cpu/StateMachineCpu';
+import Factory, { Create65C02Cpu } from '../../../../src/machine/cpu/Factory';
 
 function run(
     cpuFactory: Runner.CpuFactory,
@@ -46,11 +48,12 @@ function run(
         other = true,
         undocumented = true,
         access = true,
-        interrupt = true
+        interrupt = true,
+        specific65c02 = false,
     } = {}
 ) {
-    suite(`CPU [${cpuName}]`, function() {
-        suite('opcodes', function() {
+    suite(`CPU [${cpuName}]`, function () {
+        suite('opcodes', function () {
             if (branches) {
                 testBranches(cpuFactory);
             }
@@ -68,25 +71,42 @@ function run(
             }
         });
 
-        suite('undocumented opcodes', function() {
+        suite('undocumented opcodes', function () {
             if (undocumented) {
                 testUndocumentedOpcodes(cpuFactory);
             }
         });
 
-        suite('memory access patterns', function() {
+        suite('memory access patterns', function () {
             if (access) {
                 testAccessPatterns(cpuFactory);
             }
         });
 
-        suite('interrupt handling', function() {
+        suite('interrupt handling', function () {
             if (interrupt) {
                 testInterrupt(cpuFactory);
+            }
+        });
+
+        suite('w65c02 specific', function () {
+            if (specific65c02) {
+                test65C02(cpuFactory);
             }
         });
     });
 }
 
-run(bus => new BatchedAddressCp(bus), 'batched access CPU');
-run(bus => new StateMachineCpu(bus), 'state machine CPU');
+run((bus) => new BatchedAddressCp(bus), 'batched access CPU');
+run((bus) => new StateMachineCpu(bus), 'state machine CPU');
+
+run((bus) => Create65C02Cpu(Factory.Type.stateMachine, bus), 'state machine CPU (65c02)', {
+    branches: false,
+    flags: false,
+    other: false,
+    arithmetics: false,
+    undocumented: false,
+    access: false,
+    interrupt: false,
+    specific65c02: true,
+});
