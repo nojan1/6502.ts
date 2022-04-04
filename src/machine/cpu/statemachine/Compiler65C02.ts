@@ -20,10 +20,24 @@ class Compiler65C02 extends Compiler {
 
             case Instruction.Operation.ply:
                 return pull(this._state, (s, o) => ops.genNullary(s, (state) => (state.y = o)));
-
-            default:
-                return super.compile(op);
         }
+
+        if (
+            instruction.operation === Instruction.Operation.jmp &&
+            instruction.addressingMode === Instruction.AddressingMode.indexedIndirectX
+        ) {
+            return this._createAddressing(
+                Instruction.AddressingMode.indexedIndirectX,
+                (o, s) => {
+                    console.log(o, s);
+                    //return (s.p = o), null;
+                    return null;
+                },
+                { deref: false }
+            );
+        }
+
+        return super.compile(op);
     }
 }
 

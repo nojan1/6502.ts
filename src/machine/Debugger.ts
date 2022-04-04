@@ -40,7 +40,7 @@ class Debugger {
         this._board = board;
         this._bus = this._board.getBus();
         this._cpu = this._board.getCpu();
-        this._disassembler = new Disassembler(this._bus);
+        this._disassembler = new Disassembler(this._cpu.opcodeResolver, this._bus);
 
         this._board.trap.addHandler(this._trapHandler, this);
 
@@ -111,7 +111,7 @@ class Debugger {
         while (i < length) {
             address = (start + i) % 0x10000;
 
-            instruction = Instruction.opcodes[this._peek(address)];
+            instruction = this._cpu.opcodeResolver.resolve(this._peek(address));
             result +=
                 (this._breakpoints[address] ? '(B) ' : '    ') +
                 hex.encode(address, 4) +

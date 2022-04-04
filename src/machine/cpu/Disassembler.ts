@@ -27,9 +27,10 @@ import Instruction from './Instruction';
 import BusInterface from '../bus/BusInterface';
 
 import * as hex from '../../tools/hex';
+import OpcodeResolver from './OpcodeResolver';
 
 class Disassembler {
-    constructor(private _bus?: BusInterface) {}
+    constructor(private _opcodeResolver: OpcodeResolver, private _bus?: BusInterface) {}
 
     setBus(bus: BusInterface): Disassembler {
         this._bus = bus;
@@ -41,7 +42,7 @@ class Disassembler {
     }
 
     disassembleAt(address: number): string {
-        const instruction = Instruction.opcodes[this._peek(address)],
+        const instruction = this._opcodeResolver.resolve(this._peek(address)),
             operation = Instruction.OperationMap[instruction.operation].toUpperCase();
 
         const read8 = (a: number = address + 1) => hex.encode(this._peek(a), 2);

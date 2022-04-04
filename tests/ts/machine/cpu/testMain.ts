@@ -97,16 +97,16 @@ function run(
     });
 }
 
-run((bus) => new BatchedAddressCp(bus), 'batched access CPU');
-run((bus) => new StateMachineCpu(bus), 'state machine CPU');
+// run((bus) => new BatchedAddressCp(bus), 'batched access CPU');
+// run((bus) => new StateMachineCpu(bus), 'state machine CPU');
 
 run((bus) => Create65C02Cpu(Factory.Type.stateMachine, bus), 'state machine CPU (65c02)', {
-    branches: false,
-    flags: false,
-    other: false,
-    arithmetics: false,
+    branches: true,
+    flags: true,
+    other: true,
+    arithmetics: true,
     undocumented: false,
-    access: false,
-    interrupt: false,
+    access: true,
+    interrupt: true,
     specific65c02: true,
 });

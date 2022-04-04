@@ -279,7 +279,7 @@ class Compiler implements CompilerInterface {
             case Instruction.Operation.tya:
                 return nullaryOneCycle(this._state, (s) => ops.genNullary(s, (state) => (state.a = state.y)));
 
-            // Bramches
+            // Branches
 
             case Instruction.Operation.bcc:
                 return branch(this._state, (flags) => (flags & CpuInterface.Flags.c) === 0);
